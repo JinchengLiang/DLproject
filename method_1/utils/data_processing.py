@@ -8,7 +8,7 @@ import glob
 import ipdb
 from utils.midi2pianoroll import get_notes, resolution_transfer, note2pianoroll
 from utils.pianoroll2midi import p2m_get_notes, save2midi, pianoroll2midi
-# from configs.data_config import DATA_CONFIG
+# from configs.config_data import DATA_CONFIG
 
 def shape_to_bar_sample(m,mr,DATA_CONFIG):
     #reshape to leadsheetVAE

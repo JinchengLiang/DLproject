@@ -1,3 +1,8 @@
+/data
+/method_2/classifier
+/method_2/paper_outputs_conditional_one_hot
+/.idea
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

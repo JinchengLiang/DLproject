@@ -21,7 +21,7 @@ MODEL_CONFIG = {
 
 TRAIN_CONFIG = {
 'batch_size' : 256, 
-'epochs' : 200,
+'epochs' : 30,
 'lr' : 1e-5,
 'lr_step1' : 10,
 'lr_step2' : 30,

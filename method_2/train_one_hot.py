@@ -19,7 +19,7 @@ from utils.pianoroll2midi import *
 from utils.midi2pianoroll import midi2pianoroll
 from utils.data_processing import shape_to_bar_sample
 from utils.util import write_json, torch_summarize
-from generating import generating_while_train
+# from generating import generating_while_train
 
 
 def draw_loss(train_loss_list, test_loss_list, dir_name, label):
@@ -72,13 +72,15 @@ def reconstruct(device,DATA_CONFIG,model,dir_name,epoch):
 
 
 def generate(device,model, dir_name,epoch,sample_num=5):
-    jazz_label = True
-    midi_path = dir_name + '/jamming/'
-
-    for idx in range(sample_num):
-        m, mr = generating_while_train(device, model,jazz_label, dir_name)
-        filename ='ep_'+ str(epoch) + '_melody_' + str(idx) 
-        pianoroll2midi(m, mr, midi_path, filename)
+    # jazz_label = True
+    # midi_path = dir_name + '/jamming/'
+    #
+    # for idx in range(sample_num):
+    #     # should be the same as generate function in VAE_one_hot_class
+    #     m, mr = generating_while_train(device, model,jazz_label, dir_name)
+    #     filename ='ep_'+ str(epoch) + '_melody_' + str(idx)
+    #     pianoroll2midi(m, mr, midi_path, filename)
+    pass
 
 
 def interpolate(device, epoch,DATA_CONFIG,model, dir_name, interp_num=5):
@@ -223,7 +225,7 @@ if __name__ == '__main__':
     # args = argparse.ArgumentParser(description='train')
     parser.add_argument('-c', '--config', default= 'configs.config_vae_one_hot', type=str,
                         help='config file path')
-    parser.add_argument('-data', '--data_config', default= 'configs.data_config', type=str,
+    parser.add_argument('-data', '--data_config', default= 'configs.config_data', type=str,
                         help='data config file path')
     parser.add_argument('-ro', '--sample_ratio', default= '1', type=float,
                         help='Non-jazz/jazz data number ratio')
@@ -233,7 +235,7 @@ if __name__ == '__main__':
                         help='num_of_layer of encoder')
 
 
-    parser.add_argument('-d', '--device', default='5', type=str,
+    parser.add_argument('-d', '--device', default='0', type=str,
                         help='indices of GPUs to enable')
     parser.add_argument('-r', '--reconstruction', default=False, type=bool,
                         help='check the reconstruction while training')
@@ -283,6 +285,7 @@ if __name__ == '__main__':
     classifier_module = importlib.import_module(MAIN_CONFIG['classifier_module'], __package__)
     classifier = getattr(classifier_module, MAIN_CONFIG['classifier'])
     classifier = classifier(DATA_CONFIG,MODEL_CONFIG,device)
+    debug = torch.load(MAIN_CONFIG['pretrain_model_c'])
     classifier.load_state_dict(torch.load(MAIN_CONFIG['pretrain_model_c']))
 
 

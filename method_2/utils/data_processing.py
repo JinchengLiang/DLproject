@@ -8,7 +8,7 @@ import glob
 import ipdb
 from utils.midi2pianoroll import get_notes, resolution_transfer, note2pianoroll
 from utils.pianoroll2midi import p2m_get_notes, save2midi, pianoroll2midi
-# from configs.data_config import DATA_CONFIG
+from configs.config_data import DATA_CONFIG
 
 def shape_to_bar_sample(m,mr,DATA_CONFIG):
     #reshape to leadsheetVAE
@@ -62,7 +62,8 @@ def PATH_TT():
 
 
 def PATH_CY():
-    train_data_path = '/nas2/ai_music_database/jazz_freejammaster/split/*.mid'
+    # train_data_path = '/nas2/ai_music_database/jazz_freejammaster/split/*.mid'
+    train_data_path = DATA_CONFIG['ch_data_path']+'*.mid'
     pieces_file_path = glob.glob(train_data_path)
     return pieces_file_path
 
@@ -87,9 +88,15 @@ def get_data(bar,
             data_tpb):
     data_x = []
     for filename in pieces_file_path:
-        song_name = filename.split('.')[0].split('/')[5:]
-        seperator = '_'
-        song_name = seperator.join(song_name)
+        # song_name = filename.split('.')[0].split('/')[5:]
+
+        song_name = filename.split('/')[-1].split('\\')[-1].split('.mid')[0]
+
+
+        # if song_name == "6.3_basic_pitch":
+        #     print("debug")
+        # seperator = '_'
+        # song_name = seperator.join(song_name)
         try:
             midi = midi_parser.MidiFile(filename)
             original_tpb = midi.ticks_per_beat
@@ -97,16 +104,17 @@ def get_data(bar,
             note_group = get_notes(midi)
             where_note_group, dur_group, pitch_group = resolution_transfer(note_group, original_tpb, data_tpb, bar, ts_per_bar)
             m, mr = note2pianoroll(note_group,where_note_group,pitch_group,freq_range, freq_low, freq_up, rest_dim, bar, ts_per_bar)
-            bar_sample = shape_to_bar_sample(m,mr)
+            bar_sample = shape_to_bar_sample(m,mr,DATA_CONFIG)
             m1, mr1 = shape_to_pianoroll(bar_sample, freq_range,ts_per_bar)
             mr1 = mr1.reshape(-1,1)
             m1 = m1.reshape(-1,49)
-            save_image(torch.from_numpy(m).type(torch.FloatTensor),'./output/TT_m_'+ song_name +'.png')
-            save_image(torch.from_numpy(m1).type(torch.FloatTensor),'./output/TT_m1_'+ song_name +'.png')
+            save_image(torch.from_numpy(m).type(torch.FloatTensor),DATA_CONFIG['data_path'] + 'tt/output/tt_m_'+ song_name +'.png')
+            save_image(torch.from_numpy(m1).type(torch.FloatTensor),DATA_CONFIG['data_path'] + 'tt/output/tt_m1_'+ song_name +'.png')
             # pianoroll2midi(m,mr,'./output/TT_m_', song_name +'.mid')
             # pianoroll2midi(m1,mr1,'./output/TT_m1_', song_name +'.mid')
             data_x.append(bar_sample)
         except:
+            print(song_name)
             continue
     data_x = np.asarray(data_x)
     print(data_x.shape, ' saved.')
@@ -140,9 +148,12 @@ def get_data_CNN(bar,
             m1, mr1 = shape_to_pianoroll(bar_sample, freq_range,ts_per_bar)
             mr1 = mr1.reshape(-1,1)
             m1 = m1.reshape(-1,49)
-            save_image(torch.from_numpy(m1).type(torch.FloatTensor),'./output/TT_m1_'+ song_name +'.png')
-            pianoroll2midi(m,mr,'./output/TT_m_', song_name +'.mid')
-            pianoroll2midi(m1,mr1,'./output/TT_m1_', song_name +'.mid')
+            # save_image(torch.from_numpy(m1).type(torch.FloatTensor),'./output/TT_m1_'+ song_name +'.png')
+            # pianoroll2midi(m,mr,'./output/TT_m_', song_name +'.mid')
+            # pianoroll2midi(m1,mr1,'./output/TT_m1_', song_name +'.mid')
+            save_image(torch.from_numpy(m1).type(torch.FloatTensor), DATA_CONFIG['data_path'] + 'ChMusic/output/TT_m1_' + song_name + '.png')
+            pianoroll2midi(m, mr, DATA_CONFIG['data_path'] + 'ChMusic/output/TT_m_', song_name + '.mid')
+            pianoroll2midi(m1, mr1, DATA_CONFIG['data_path'] + 'ChMusic/output/TT_m1_', song_name + '.mid')
             data_x.append(m1)
         except:
             continue
@@ -165,11 +176,13 @@ if __name__ == '__main__':
     freq_low = 48   #48 ~ 95
     freq_range = freq_up - freq_low + 2
     data_tpb = 4
-    save_path = '/nas2/annahung/project/anna_jam/data/'
-    save_filename = 'cy_m.npy'
+    # save_path = '/nas2/annahung/project/anna_jam/data/'
+    save_path = DATA_CONFIG['data_path']
+    save_filename = 'tt_m.npy'
 
     # pieces_file_path = PATH_TT()
-    pieces_file_path = PATH_CY()
+    # pieces_file_path = PATH_CY()
+    pieces_file_path = glob.glob(DATA_CONFIG['tt_data_path'] + '*.mid')
 
     get_data(bar,pieces_file_path,save_path,save_filename,
                 ts_per_bar,rest_dim,freq_up,freq_low, freq_range,data_tpb)

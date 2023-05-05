@@ -9,7 +9,7 @@ import torch
 
 from utils.midi_io.src.core_midi import midi_parser
 from utils.write_midi import *
-from configs.data_config import DATA_CONFIG
+from configs.config_data import DATA_CONFIG
 
 
 def batch_shape_to_pianoroll(batch_bar_sample, bar, freq_range,ts_per_bar):

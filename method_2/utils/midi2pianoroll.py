@@ -36,7 +36,7 @@ def resolution_transfer(note_group, original_tpb, data_tpb, bar, ts_per_bar):
         pitch = a_note[2]
         where_note = round(note_on/transfer_ratio)
         duration = round(dur/transfer_ratio)
-        if where_note >= (bar*ts_per_bar-1):
+        if where_note >= (bar*ts_per_bar-1):    # JinchengLiang: only use the first few seconds, limit the music should begin at the first few seconds, 6.3 failure
             break
         else:
             where_note_group.append(where_note)
