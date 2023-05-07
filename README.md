@@ -7,7 +7,11 @@ Create config_data.py file below method2/config/, modify the path based on your 
 ## Data Processing
 mid files -> utils/data_processing.py -> *.npy
 
-The .npy file contains the pianoroll metrics. There are two .npy files used as inputs of the model, one is the source data which have no label and the other is chmusic data.
+They first crop the first DATA_CONFIG['bar'] bars from original data and compress them to bar\*ts_per_bar ticks, the compression_ratio=origin_tick_per_beat/data_tick_per_beat. Then get the pianoroll metric m (bar\*ts_per_bar x freq_range) and mr (containing the begin tick of notes). Finally concatenate m and mr based on the order of bars. The variable name is called 'bar_sample'.
+
+The .npy file contains the 'bar_sample'. There are two .npy files used as inputs of the model, one is the source data which have no label and the other is chmusic data.
+
+There should be a pre-process of the data, especially the chmusic, to crop the blank at the beginning of mid files.
 
 ## Training
 The config files are in configs folder.
