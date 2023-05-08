@@ -99,7 +99,6 @@ def save_midi_pypiano(m, midi_path, filename):
     multitrack = Multitrack(tracks=[track_m], tempo=80.0, beat_resolution=resolution)
     pypiano.write(multitrack, midi_path+filename+".mid")
 
-
 def pianoroll2midi(m,mr,midi_path,filename):
     bar = 4
     ts_per_bar = 16

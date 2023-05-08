@@ -294,8 +294,8 @@ class ratio_one_hot_data(object):
         # data_path_cy = '/nas2/annahung/project/anna_jam/data/cy_m.npy'
         # data_path_rb = '/nas2/annahung/project/anna_jam/data/rb_m.npy'
 
-        data_path_cy = DATA_CONFIG['data_path'] + 'ChMusiccy_m.npy'
-        data_path_tt = DATA_CONFIG['data_path'] + 'tt_m.npy'
+        data_path_cy = DATA_CONFIG['data_path'] + DATA_CONFIG['ch_npy']
+        data_path_tt = DATA_CONFIG['data_path'] + DATA_CONFIG['tt_npy']
 
         tt_train_m, tt_test_m, tt_train_y, tt_test_y = self.get_data(data_path_tt,0)
         cy_train_m, cy_test_m, cy_train_y, cy_test_y = self.get_data(data_path_cy,1)

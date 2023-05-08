@@ -10,9 +10,9 @@ MAIN_CONFIG = {
     # 'classifier' : 'classifier_binary',
     'classifier' : 'classifier',
     'pretrain_model_c' :
-        'C:/Users/13516/Desktop/2023 Spring/ECE-GY 6953 Deep Learning/FinalProject/jazz_melody_generation/method_2/classifier/2023_05_05__18_13/presents/loss_min.pt',
+        'C:/Users/13516/Desktop/2023 Spring/ECE-GY 6953 Deep Learning/DLproject/method_2/classifier/2023_05_08__02_40/presents/loss_min.pt',
 
-    'package_path' : '/nas2/annahung/project/anna_jam_v2/',
+    # 'package_path' : '/nas2/annahung/project/anna_jam_v2/',
 
 }
 
@@ -47,7 +47,7 @@ MODEL_CONFIG = {
 
 TRAIN_CONFIG = {
 'batch_size' : 256, 
-'epochs' : 5,
+'epochs' : 5000,
 'vae' : {
     'lr_vae' : 0.001,
     'lr_step1':40,
