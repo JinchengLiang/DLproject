@@ -8,6 +8,6 @@
 
 [mgeval_src.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/mgeval/mgeval_src.zip)
 
-set1: [ChMusicMIDI.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/dataset/ChMusicMIDI.zip)
+dataset1: [ChMusicMIDI.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/dataset/ChMusicMIDI.zip)
 
-set2: [gen8bar.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/dataset/gen8bar.zip)
+dataset2: [gen8bar.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/dataset/gen8bar.zip)
