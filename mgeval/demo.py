@@ -528,7 +528,7 @@ for i in range(1,16):
             # print '------------------------'
             # print ' demo_set1'
             OA = utils.overlap_area(plot_set1_intra[m], plot_sets_inter[m])
-            print OA
+            print (OA)
             text_file.write(str(OA))
             text_file.write('\n')
     
