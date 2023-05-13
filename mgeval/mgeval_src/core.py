@@ -60,7 +60,7 @@ class metrics(object):
                 time_sig = pattern[track_num][i].data
                 bar_length = time_sig[0] * resolution * 4 / 2**(time_sig[1])
                 if num_bar is None:
-                    num_bar = int(round(float(pattern[track_num][-1].tick) / bar_length))
+                    num_bar = int(float(pattern[track_num][-1].tick) // bar_length)
                     used_notes = np.zeros((num_bar, 1))
                 else:
                     used_notes = np.zeros((num_bar, 1))
@@ -73,10 +73,10 @@ class metrics(object):
                     if num_bar is None:
                         num_bar = int(round(float(pattern[track_num][-1].tick) / bar_length))
                         used_notes = np.zeros((num_bar, 1))
-                        used_notes[pattern[track_num][i].tick / bar_length] += 1
+                        used_notes[pattern[track_num][i].tick // bar_length] += 1
                     else:
                         used_notes = np.zeros((num_bar, 1))
-                        used_notes[pattern[track_num][i].tick / bar_length] += 1
+                        used_notes[pattern[track_num][i].tick // bar_length] += 1
                     note_list = []
                     note_list.append(pattern[track_num][i].data[0])
 
@@ -87,7 +87,7 @@ class metrics(object):
                         else:
                             note_list = []
                     note_list.append(pattern[track_num][i].data[0])
-                    used_notes[pattern[track_num][i].tick / bar_length] += 1
+                    used_notes[pattern[track_num][i].tick // bar_length] += 1
 
         used_pitch = np.zeros((num_bar, 1))
         current_note = 0
@@ -147,13 +147,13 @@ class metrics(object):
                     if num_bar is None:
                         num_bar = int(round(float(pattern[track_num][-1].tick) / bar_length))
                         used_notes = np.zeros((num_bar, 1))
-                        used_notes[pattern[track_num][i].tick / bar_length] += 1
+                        used_notes[pattern[track_num][i].tick // bar_length] += 1
                     else:
                         used_notes = np.zeros((num_bar, 1))
-                        used_notes[pattern[track_num][i].tick / bar_length] += 1
+                        used_notes[pattern[track_num][i].tick // bar_length] += 1
 
                 else:
-                    used_notes[pattern[track_num][i].tick / bar_length] += 1
+                    used_notes[pattern[track_num][i].tick // bar_length] += 1
         return used_notes
 
     def total_pitch_class_histogram(self, feature):
@@ -173,7 +173,7 @@ class metrics(object):
         histogram = histogram / sum(histogram)
         return histogram
 
-    def bar_pitch_class_histogram(self, feature, track_num=1, bpm=120, num_bar=None):
+    def bar_pitch_class_histogram(self, feature, track_num=1, num_bar=None, bpm=120):
         """
         bar_pitch_class_histogram (Pitch class histogram per bar):
 
@@ -205,7 +205,7 @@ class metrics(object):
             piano_roll = np.transpose(piano_roll, (1, 0))
             actual_bar = len(piano_roll) / bar_length
             bar_length = int(math.ceil(bar_length))
-
+        print(f'actual_bar = {actual_bar}')
         if actual_bar > num_bar:
             piano_roll = piano_roll[:-np.mod(len(piano_roll), bar_length)].reshape((num_bar, -1, 128))  # make exact bar
         elif actual_bar == num_bar:
@@ -213,7 +213,7 @@ class metrics(object):
         else:
             piano_roll = np.pad(piano_roll, ((0, int(num_bar * bar_length - len(piano_roll))), (0, 0)), mode='constant', constant_values=0)
             piano_roll = piano_roll.reshape((num_bar, -1, 128))
-
+        #print(piano_roll[piano_roll > 0])
         bar_histogram = np.zeros((num_bar, 12))
         for i in range(0, num_bar):
             histogram = np.zeros(12)
@@ -221,7 +221,7 @@ class metrics(object):
                 pitch_class = j % 12
                 histogram[pitch_class] += np.sum(piano_roll[i], axis=0)[j]
             if sum(histogram) != 0:
-                bar_histogram[i] = histogram / sum(histogram)
+                bar_histogram[i] = histogram // sum(histogram)
             else:
                 bar_histogram[i] = np.zeros(12)
         return bar_histogram
