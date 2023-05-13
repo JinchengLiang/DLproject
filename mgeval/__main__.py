@@ -46,14 +46,14 @@ num_samples = min(len(set2), len(set1))
 print(f"num_samples = {num_samples}")
 
 evalset = { 
-            'total_used_pitch': np.zeros((num_samples, 1))
-          , 'pitch_range': np.zeros((num_samples, 1))
+            'total_used_pitch': np.zeros((num_samples, 1)) # single_arg_metrics
+          , 'pitch_range': np.zeros((num_samples, 1)) # single_arg_metrics
           , 'avg_pitch_shift': np.zeros((num_samples, 1))
-          , 'avg_IOI': np.zeros((num_samples, 1))
+          , 'avg_IOI': np.zeros((num_samples, 1)) # single_arg_metrics
           , 'total_used_note': np.zeros((num_samples, 1))
           , 'bar_used_pitch': np.zeros((num_samples, args.num_bar, 1))
           , 'bar_used_note': np.zeros((num_samples, args.num_bar, 1))
-          , 'total_pitch_class_histogram': np.zeros((num_samples, 12))
+          , 'total_pitch_class_histogram': np.zeros((num_samples, 12)) # single_arg_metrics
           , 'bar_pitch_class_histogram': np.zeros((num_samples, args.num_bar, 12))
           , 'note_length_hist': np.zeros((num_samples, 12))
           , 'pitch_class_transition_matrix': np.zeros((num_samples, 12, 12))
@@ -64,7 +64,7 @@ evalset = {
 bar_metrics = [ 'bar_used_pitch', 'bar_used_note', 'bar_pitch_class_histogram' ]
 
 for metric in bar_metrics:
-  print(f"args.num_bar = {args.num_bar}")
+  # print(f"args.num_bar = {args.num_bar}")
   if not args.num_bar:
     evalset.pop(metric)
 
@@ -97,10 +97,17 @@ for _set, _set_eval in sets:
               tmp = evaluator(feature)
           elif metric in bar_metrics:
               # print(metric)
-              tmp = evaluator(feature, 0, args.num_bar)
+              if (metric == 'bar_pitch_class_histogram'):
+                  track_num = 0
+              else:
+                  track_num = 1
+              tmp = evaluator(feature, track_num=track_num, num_bar=args.num_bar)
               # print(tmp.shape)
           else:
-              tmp = evaluator(feature, 0)
+              if (metric == 'pitch_class_transition_matrix'):
+                  tmp = evaluator(feature, normalize = 2)
+              else:
+                  tmp = evaluator(feature, track_num=1)
           _set_eval[metric][i] = tmp
 
 loo = LeaveOneOut()
