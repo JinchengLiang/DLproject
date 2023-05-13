@@ -11,3 +11,15 @@
 dataset1: [ChMusicMIDI.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/dataset/ChMusicMIDI.zip)
 
 dataset2: [gen8bar.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/dataset/gen8bar.zip)
+
+## __main__.py in mgeval folder
+
+You can run mgeval as a standalone module with the following command on the root directory:
+```linux
+python . --set1dir <path/to/first/sample/directory> --set2dir <path/to/second/sample/directory> --outfile <output_filename> --num-bar <num_bar>
+```
+For example:
+```commandline
+python3 . --set1dir ../dataset/gen8bar --set2dir ../dataset/ChMusicMIDI --outfile main_output --num-bar 150
+```
+Note: num-bar >= max(actual_bar)
