@@ -30,11 +30,11 @@ python data_div.py --setdir ./dataset/ChMusicMIDI --outdir ./dataset/ChMusicMIDI
 
 - [setup.py](https://github.com/vishnubob/python-midi/blob/master/setup.py)
 
-- [mgeval_src.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/mgeval/mgeval_src.zip)
+- [mgeval_src.zip](https://github.com/JinchengLiang/DLproject/tree/Shaomin/mgeval)
 
-- dataset1: [ChMusicMIDI.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/dataset/ChMusicMIDI.zip)
+- dataset1: [ChMusicMIDI.zip](https://github.com/JinchengLiang/DLproject/tree/Shaomin/dataset)
 
-- dataset2: [gen8bar.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/dataset/gen8bar.zip)
+- dataset2: [gen8bar.zip](https://github.com/JinchengLiang/DLproject/tree/Shaomin/dataset)
 
 ### __main__.py
 
