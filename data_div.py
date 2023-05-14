@@ -70,6 +70,7 @@ for mid_file in mid_set:
         new_midi = MIDIFile(1, deinterleave=False, eventtime_is_ticks=True)  # One track, defaults to format 1 (tempo track
         # automatically created)
         new_midi.addTempo(track, 0, tempo)
+        new_midi.addTimeSignature(track=0, time=0, numerator=4, denominator=4, clocks_per_tick=mid.ticks_per_beat)
         for note in note_list:
             new_midi.addNote(track, channel, note.pitch, note.start, note.end-note.start, note.velocity)
 
