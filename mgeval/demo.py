@@ -12,18 +12,20 @@ if os.environ.get('DISPLAY','') == '':
     print('no display found. Using non-interactive Agg backend')
     mpl.use('Agg')
 from mgeval_src import core, utils
-from sklearn.model_selection import LeaveOneOut 
+from sklearn.model_selection import LeaveOneOut
 
 
-set1 = glob.glob('/nas2/ai_music_database/jazz_freejammaster/split/*.mid')
+set1 = glob.glob('../dataset/ChMusicMIDI/*.mid')
 # random.seed(2)
 random.seed(1)
-num_samples = 100
+num_samples = len(set1)
+print(num_samples)
 set1 = random.sample(set1, num_samples)
 
 num_sets = 16
 model_list = [0] * num_sets
 model_list[0] = set1
+'''
 model_list[1] = glob.glob('/nas2/annahung/project/anna_jam_v2/paper_outputs_jazz_only/no_pcd_bata_0.7_en_layer_2/jamming/loss*.mid')
 model_list[2] = glob.glob('/nas2/annahung/project/anna_jam_v2/paper_outputs_jazz_only/bata_0.7_en_layer_2/jamming/loss*.mid')
 model_list[3] = glob.glob('/nas2/annahung/project/anna_jam_v2/paper_outputs_adaptation_no_pcd/bata_0.7_en_layer_2_ratio_6.0/jamming/loss_tt*.mid')
@@ -56,7 +58,7 @@ assert len(model_list[12]) == num_samples
 assert len(model_list[13]) == num_samples
 assert len(model_list[14]) == num_samples
 assert len(model_list[15]) == num_samples
-
+'''
 
 
 dir_name = 'result/3_'
@@ -528,7 +530,7 @@ for i in range(1,16):
             # print '------------------------'
             # print ' demo_set1'
             OA = utils.overlap_area(plot_set1_intra[m], plot_sets_inter[m])
-            print OA
+            print (OA)
             text_file.write(str(OA))
             text_file.write('\n')
     
