@@ -205,7 +205,7 @@ class metrics(object):
             piano_roll = np.transpose(piano_roll, (1, 0))
             actual_bar = len(piano_roll) / bar_length
             bar_length = int(math.ceil(bar_length))
-        print(f'actual_bar = {actual_bar}')
+        #print(f'actual_bar = {actual_bar}')
         if actual_bar > num_bar:
             #print(len(piano_roll), bar_length, -np.mod(len(piano_roll), bar_length))
             #piano_roll = piano_roll[:-np.mod(len(piano_roll), bar_length)].reshape((num_bar, -1, 128))  # make exact bar
