@@ -1,4 +1,4 @@
-# DLproject
+# mgeval
 ## Conference
 - ### [mgeval](https://github.com/RichardYang40148/mgeval/blob/master/demo.ipynb)
 
