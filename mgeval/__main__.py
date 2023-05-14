@@ -20,7 +20,7 @@ parser.add_argument('--set2dir', required=True, type=str,
 parser.add_argument('--outfile', required=True, type=str,
                     help='File (pickle) where the analysis will be stored')
 
-parser.add_argument('--num-bar', required=False, type=int, default=None,
+parser.add_argument('--num_bar', required=False, type=int, default=None,
                     help='Number of bars to account for during processing')
 
 args = parser.parse_args()
@@ -33,11 +33,11 @@ print('Evaluation sets (sample and baseline):')
 # print(set2)
 
 if not any(set1):
-  print("Error: sample set it empty")
+  print("Error: sample set is empty")
   exit()
 
 if not any(set2):
-  print("Error: baseline set it empty")
+  print("Error: baseline set is empty")
   exit()
 
 # Initialize Evaluation Set
@@ -45,20 +45,27 @@ num_samples = min(len(set2), len(set1))
 
 print(f"num_samples = {num_samples}")
 
+if not args.num_bar:
+    bar_num_bar = 0
+else:
+    bar_num_bar = args.num_bar
+
 evalset = { 
             'total_used_pitch': np.zeros((num_samples, 1)) # single_arg_metrics
           , 'pitch_range': np.zeros((num_samples, 1)) # single_arg_metrics
           , 'avg_pitch_shift': np.zeros((num_samples, 1))
           , 'avg_IOI': np.zeros((num_samples, 1)) # single_arg_metrics
           , 'total_used_note': np.zeros((num_samples, 1))
-          , 'bar_used_pitch': np.zeros((num_samples, args.num_bar, 1))
-          , 'bar_used_note': np.zeros((num_samples, args.num_bar, 1))
+          , 'bar_used_pitch': np.zeros((num_samples, bar_num_bar, 1))
+          , 'bar_used_note': np.zeros((num_samples, bar_num_bar, 1))
           , 'total_pitch_class_histogram': np.zeros((num_samples, 12)) # single_arg_metrics
-          , 'bar_pitch_class_histogram': np.zeros((num_samples, args.num_bar, 12))
+          , 'bar_pitch_class_histogram': np.zeros((num_samples, bar_num_bar, 12))
           , 'note_length_hist': np.zeros((num_samples, 12))
           , 'pitch_class_transition_matrix': np.zeros((num_samples, 12, 12))
           , 'note_length_transition_matrix': np.zeros((num_samples, 12, 12))
           }
+
+
 
 
 bar_metrics = [ 'bar_used_pitch', 'bar_used_note', 'bar_pitch_class_histogram' ]
@@ -67,6 +74,7 @@ for metric in bar_metrics:
   # print(f"args.num_bar = {args.num_bar}")
   if not args.num_bar:
     evalset.pop(metric)
+
 
 # print(evalset)
 
@@ -160,7 +168,9 @@ for i, metric in enumerate(metrics_list):
     ol2 = utils.overlap_area(plot_set2_intra[i], plot_sets_inter[i])
 
     print(f"kl1 = {kl1}")
+    print(f"ol1 = {ol1}")
     print(f"kl2 = {kl2}")
+    print(f"ol1 = {ol2}")
     output[metric] = [mean, std, kl1, ol1, kl2, ol2]
 
 
