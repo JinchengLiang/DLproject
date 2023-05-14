@@ -2,7 +2,7 @@
 
 ## mgeval
 
-### [demo.ipynb](https://github.com/JinchengLiang/DLproject/blob/Shaomin/mgeval/demo.ipynb)
+### demo.ipynb
 
 #### Upload files
 
@@ -16,12 +16,24 @@ dataset2: [gen8bar.zip](https://github.com/JinchengLiang/DLproject/blob/Shaomin/
 
 ### __main__.py
 
-You can run mgeval as a standalone module with the following command on the root directory:
-```linux
+To evaluate two datasets.
+
+```commandline
 python . --set1dir <path/to/first/sample/directory> --set2dir <path/to/second/sample/directory> --outfile <output_filename> --num-bar <num_bar>
 ```
 For example:
 ```commandline
-python3 . --set1dir ../dataset/gen8bar --set2dir ../dataset/ChMusicMIDI --outfile main_output --num_bar 150
+python . --set1dir ../dataset/gen8bar --set2dir ../dataset/ChMusicMIDI8bar --outfile main_output --num_bar 8
 ```
-Note: num_bar >= max(actual_bar)
+
+## data_div.py
+To split each MIDI file in a dataset to several MIDI files according to bar count per file.
+```commandline
+python data_div.py --setdir <path/to/dataset/directory> --outdir <path/to/outfiles/directory> --num_bar <num_bar>
+```
+For example
+```commandline
+python data_div.py --setdir ./dataset/ChMusicMIDI --outdir ./dataset/ChMusicMIDI8bar --num_bar 8
+```
+
+
