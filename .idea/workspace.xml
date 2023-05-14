@@ -4,9 +4,7 @@
     <list default="true" id="bf3fe1dd-0028-44a9-b46c-5278963be42f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo_gen_ChMusic_all_features.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/method_2/utils/midi_io/src/core_midi/midi_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/method_2/utils/midi_io/src/core_midi/midi_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/process/process.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mgeval/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/mgeval/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,12 +36,13 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/Users/xusm/Documents/GitHub/DLproject/process",
+    "last_opened_file_path": "/Users/xusm/Documents/GitHub/DLproject/mgeval",
     "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/mgeval" />
       <recent name="$PROJECT_DIR$/process" />
       <recent name="$PROJECT_DIR$" />
     </key>
