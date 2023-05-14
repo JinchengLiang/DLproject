@@ -2,7 +2,7 @@
 DATA_CONFIG = {
     'bar': 4,
     'ts_per_bar': 16,
-    'feature_size': 800,    # or 16*48*1?
+    'feature_size': 800,    # (freq_up-freq_low+2)*ts_per_bar+ts_per_bar
     'freq_up': 95,
     'freq_low': 48,
     'testset_ratio': 0.2,

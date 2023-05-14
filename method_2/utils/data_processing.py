@@ -162,7 +162,7 @@ def get_data_CNN(bar,
 if __name__ == '__main__':
 
     # choose ch data or tt data or debug data
-    data_style = 'tt'
+    data_style = 'debug'
     if data_style == 'ch':
         pieces_file_path = glob.glob(DATA_CONFIG['ch_data_path'] + '*.mid')
         save_filename = DATA_CONFIG['ch_npy']

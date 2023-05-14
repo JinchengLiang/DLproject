@@ -230,7 +230,7 @@ class VAE_one_hot(nn.Module):
         
         self.hid2mean   = nn.Linear(self.hidden_m*self.Bi*self.bar , self.hidden_m)
         self.hid2var    = nn.Linear(self.hidden_m*self.Bi*self.bar , self.hidden_m)
-        self.lat2hidm   = nn.Linear(self.hidden_m + 2 , self.hidden_m)
+        self.lat2hidm   = nn.Linear(self.hidden_m + 2 , self.hidden_m)  # 2 specify the type (common, chinese)
         
         # self.outm     = nn.Linear(self.hidden_m*self.Bi_de + self.hidden_m  , self.feature_size)
         self.outm     = nn.Linear(self.hidden_m*self.Bi_de  , self.feature_size)

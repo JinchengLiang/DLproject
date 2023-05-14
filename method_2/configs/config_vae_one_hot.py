@@ -47,7 +47,7 @@ MODEL_CONFIG = {
 
 TRAIN_CONFIG = {
 'batch_size' : 256, 
-'epochs' : 5000,
+'epochs' : 10,
 'vae' : {
     'lr_vae' : 0.001,
     'lr_step1':40,
