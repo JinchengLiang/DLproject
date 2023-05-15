@@ -246,7 +246,7 @@ class VAE_one_hot(nn.Module):
 
     def reparameterize(self, mu, logvar, y):
         std = logvar.mul(0.5).exp_()
-        eps = torch.randn(mu.shape).cuda()
+        eps = torch.randn(mu.shape)
         z = eps * std + mu
         
         label_z = torch.cat((z,y),1)

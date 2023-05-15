@@ -1,3 +1,5 @@
+import os
+
 import mido
 import numpy as np
 import pypianoroll as pypiano

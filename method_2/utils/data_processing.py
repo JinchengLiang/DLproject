@@ -1,3 +1,5 @@
+import os
+
 import mido
 import numpy as np
 import torch
@@ -103,8 +105,9 @@ def get_data(bar,
             assert m1.all() == m.all()
             assert mr1.all() == mr.all()
 
-            save_image(torch.from_numpy(m).type(torch.FloatTensor),
-                       DATA_CONFIG['data_path'] + data_style + '/output/' + song_name + '_m.png')
+            image_path = DATA_CONFIG['data_path'] + data_style + '/output/' + song_name + '_m.png'
+            os.makedirs(os.path.dirname(image_path), exist_ok=True)
+            save_image(torch.from_numpy(m).type(torch.FloatTensor), image_path)
 
             # save_image(torch.from_numpy(m1).type(torch.FloatTensor),DATA_CONFIG['data_path'] + 'tt/output/tt_m1_'+ song_name +'.png')
             # pianoroll2midi(m,mr,'./output/TT_m_', song_name +'.mid')
@@ -162,7 +165,9 @@ def get_data_CNN(bar,
 if __name__ == '__main__':
 
     # choose ch data or tt data or debug data
-    data_style = 'debug'
+    #data_style = 'ch'
+    data_style = 'tt'
+    #data_style = 'debug'
     if data_style == 'ch':
         pieces_file_path = glob.glob(DATA_CONFIG['ch_data_path'] + '*.mid')
         save_filename = DATA_CONFIG['ch_npy']
@@ -172,6 +177,10 @@ if __name__ == '__main__':
     elif data_style == 'debug':
         pieces_file_path = glob.glob(DATA_CONFIG['debug_data_path'] + '*.mid')
         save_filename = 'debug_m.npy'
+
+    if not any(pieces_file_path):
+        print("Error: sample set is empty")
+        exit()
 
     bar = DATA_CONFIG['bar']
     ts_per_bar = DATA_CONFIG['ts_per_bar']

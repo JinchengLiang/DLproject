@@ -8,10 +8,10 @@ DATA_CONFIG = {
     'freq_low': 48,
     'testset_ratio': 0.2,
     'data_tpb': 4,
-    'data_path': os.path.join("..", "..", "dataset"),
-    'ch_data_path': os.path.join("..", "..", "dataset", "ChMusicMIDI8bar"),
-    'tt_data_path': os.path.join("..", "..", "dataset", "tt"),
-    'debug_data_path': os.path.join("..", "..", "dataset", "debug"),
+    'data_path': "../dataset/",
+    'ch_data_path': "../../dataset/ChMusicMIDI8bar/",
+    'tt_data_path': "../../dataset/tt/",
+    'debug_data_path': "../../dataset/debug/",
     'ch_npy': "ch_m_0508.npy",
     'tt_npy': "tt_m_0508.npy"
 }
