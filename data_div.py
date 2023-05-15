@@ -36,6 +36,7 @@ for mid_file in mid_set:
     for note in notes:
         start_bar = note.start // ticks_num_bar
         end_bar = note.end // ticks_num_bar
+        last_bar = end_bar
         if start_bar == end_bar:    # This note is all in one 8 bars
             new_note = deepcopy(note)
             new_note.start = new_note.start - start_bar * ticks_num_bar
@@ -48,7 +49,7 @@ for mid_file in mid_set:
             assert 0 <= end_bar-start_bar < ticks_num_bar
             new_note0 = deepcopy(note)
             new_note0.start = new_note0.start - start_bar * ticks_num_bar
-            new_note0.end = ticks_num_bar - 1
+            new_note0.end = ticks_num_bar
 
             new_note1 = deepcopy(note)
             new_note1.start = 0
@@ -63,24 +64,25 @@ for mid_file in mid_set:
                 div_mids[start_bar + 1].append(new_note1)
 
     for bar, note_list in div_mids.items():
-        track = 0
-        channel = 0
-        tempo = 120  # In BPM
+        if bar != last_bar:
+            track = 0
+            channel = 0
+            tempo = 120  # In BPM
 
-        new_midi = MIDIFile(1, deinterleave=False, eventtime_is_ticks=True)  # One track, defaults to format 1 (tempo track
-        # automatically created)
-        new_midi.addTempo(track, 0, tempo)
-        new_midi.addTimeSignature(track=0, time=0, numerator=4, denominator=4, clocks_per_tick=mid.ticks_per_beat)
-        for note in note_list:
-            new_midi.addNote(track, channel, note.pitch, note.start, note.end-note.start, note.velocity)
+            new_midi = MIDIFile(1, deinterleave=False,ticks_per_quarternote=mid.ticks_per_beat, eventtime_is_ticks=True)  # One track, defaults to format 1 (tempo track
+            # automatically created)
+            new_midi.addTempo(track, 0, tempo)
+            new_midi.addTimeSignature(track=0, time=0, numerator=4, denominator=2, clocks_per_tick=24)
+            for note in note_list:
+                new_midi.addNote(track, channel, note.pitch, note.start, note.end-note.start, note.velocity)
 
-        outfilename = f"{filename_without_ext}_{bar}.mid"
-        outfilepath = os.path.join(args.outdir, outfilename)
-        # create directory if it does not exist
-        os.makedirs(os.path.dirname(outfilepath), exist_ok=True)
-        with open(outfilepath, "wb") as output_file:
-            new_midi.writeFile(output_file)
-        num_mid_file += 1
+            outfilename = f"{filename_without_ext}_{bar}.mid"
+            outfilepath = os.path.join(args.outdir, outfilename)
+            # create directory if it does not exist
+            os.makedirs(os.path.dirname(outfilepath), exist_ok=True)
+            with open(outfilepath, "wb") as output_file:
+                new_midi.writeFile(output_file)
+            num_mid_file += 1
 
     #print("debug")
 
