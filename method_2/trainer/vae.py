@@ -256,9 +256,11 @@ class VAETrainer_no_pcd_one_hot():
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
 
-        predict_y_sigmoid, _, _ = model_C(predict_m)
+        # predict_y_sigmoid, _, _ = model_C(predict_m)
+        predict_y_sigmoid, _ = model_C(predict_m)
         _, answer = torch.max(test_y,1)
         answer = answer.type(torch.FloatTensor).to(self.device)
+        predict_y_sigmoid = predict_y_sigmoid[:, 0]     # Jincheng
         BCEc = F.binary_cross_entropy(predict_y_sigmoid,answer, reduction='sum')
         predict_y2 = [1 if item>=0.5 else 0 for item in predict_y_sigmoid] 
         

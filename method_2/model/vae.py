@@ -191,7 +191,8 @@ class VAE_one_hot(nn.Module):
         self.bar = DATA_CONFIG['bar']
         self.ts_per_bar = DATA_CONFIG['ts_per_bar']
         self.feature_size = DATA_CONFIG['feature_size']
-        self.freq_range = DATA_CONFIG['freq_range']
+        # self.freq_range = DATA_CONFIG['freq_range']
+        self.freq_range = DATA_CONFIG['freq_up'] - DATA_CONFIG['freq_low'] + 2
         self.primary_event = self.feature_size - 1
         self.hidden_m = MODEL_CONFIG['vae']['encoder']['hidden_m']
         self.Bi = 2 if MODEL_CONFIG['vae']['encoder']['direction'] else 1
@@ -229,7 +230,7 @@ class VAE_one_hot(nn.Module):
         
         self.hid2mean   = nn.Linear(self.hidden_m*self.Bi*self.bar , self.hidden_m)
         self.hid2var    = nn.Linear(self.hidden_m*self.Bi*self.bar , self.hidden_m)
-        self.lat2hidm   = nn.Linear(self.hidden_m + 2 , self.hidden_m)
+        self.lat2hidm   = nn.Linear(self.hidden_m + 2 , self.hidden_m)  # 2 specify the type (common, chinese)
         
         # self.outm     = nn.Linear(self.hidden_m*self.Bi_de + self.hidden_m  , self.feature_size)
         self.outm     = nn.Linear(self.hidden_m*self.Bi_de  , self.feature_size)
@@ -314,6 +315,8 @@ class VAE_one_hot(nn.Module):
         p_z = Variable(torch.randn(sample_num ,self.hidden_m)).to(self.device)
         y   = Variable(torch.from_numpy(y).type(torch.FloatTensor)).to(self.device)
         label_z = torch.cat((p_z,y), 1)
+        # if device == torch.device('cuda'):
+        #     label_z = label_z.cuda()
         melody= self.decode(label_z)
         m_binarized = self.binarize(melody)
         predict_m = m_binarized.cpu().detach()
