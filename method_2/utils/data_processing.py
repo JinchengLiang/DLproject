@@ -6,7 +6,7 @@ from torchvision.utils import save_image
 # from utils.write_midi import *
 import glob
 import ipdb
-from utils.midi2pianoroll import get_notes, resolution_transfer, note2pianoroll
+from utils.midi2pianoroll import get_notes, resolution_transfer, note2pianoroll, div_notes, div_notes_one_bar, check_quality, resolution_compress, get_pianoroll
 from utils.pianoroll2midi import p2m_get_notes, save2midi, pianoroll2midi
 from configs.config_data import DATA_CONFIG
 
@@ -81,15 +81,32 @@ def get_data(bar,
             data_tpb,
             data_style):
     data_x = []
+
+
     for filename in pieces_file_path:
         song_name = filename.split('/')[-1].split('\\')[-1].split('.mid')[0]
 
         try:
             midi = midi_parser.MidiFile(filename)
-            original_tpb = midi.ticks_per_beat
+            # original_tpb = midi.ticks_per_beat
 
-            note_group = get_notes(midi, freq_up, freq_low)    # note_group [start, length, pitch, velocity]
-            where_note_group, dur_group, pitch_group = resolution_transfer(note_group, original_tpb, data_tpb, bar, ts_per_bar)
+            note_group = get_notes(midi)    # note_group [start, length, pitch, velocity]
+            if note_group is False:
+                continue
+            # divide the notes by certain bars.
+            notes_bars = div_notes(note_group, midi.ticks_per_beat, bar)
+            # notes_one_bar = div_notes_one_bar(note_group, midi.ticks_per_beat)
+            note_starts = resolution_compress(notes_bars, midi.ticks_per_beat, data_tpb)
+            check_quality(notes_bars, note_starts, bar, freq_up, freq_low, ts_per_bar, data_style)
+            for k in note_starts.keys():
+                m, mr = get_pianoroll(notes_bars[k], note_starts[k], ts_per_bar, bar, freq_range, freq_low, rest_dim)
+                bar_sample = shape_to_bar_sample(m, mr, ts_per_bar, freq_range, bar)
+                save_image(torch.from_numpy(m).type(torch.FloatTensor),
+                           DATA_CONFIG['data_path'] + data_style + '/output/' + song_name + '_' + str(k) + '_m.png')
+
+                data_x.append(bar_sample)
+            # where_note_group, dur_group, pitch_group = resolution_transfer(note_group, original_tpb, data_tpb, bar, ts_per_bar)
+            '''
             if not check_data_quality(where_note_group, pitch_group, bar, ts_per_bar):
                 continue
             m, mr = note2pianoroll(note_group,where_note_group,pitch_group,freq_range, freq_low, freq_up, rest_dim, bar, ts_per_bar)
@@ -110,7 +127,7 @@ def get_data(bar,
             # pianoroll2midi(m,mr,'./output/TT_m_', song_name +'.mid')
             # pianoroll2midi(m1,mr1,'./output/TT_m1_', song_name +'.mid')
             data_x.append(bar_sample)
-
+            '''
         except Exception as e:
             print(f"{song_name}: {e}")
             continue
@@ -162,7 +179,7 @@ def get_data_CNN(bar,
 if __name__ == '__main__':
 
     # choose ch data or tt data or debug data
-    data_style = 'debug'
+    data_style = 'ch'
     if data_style == 'ch':
         pieces_file_path = glob.glob(DATA_CONFIG['ch_data_path'] + '*.mid')
         save_filename = DATA_CONFIG['ch_npy']

@@ -307,7 +307,7 @@ class ratio_one_hot_data(object):
         # sample_num = int(self.sample_ratio * 5769)  # number of tt mid files
         # test_sample_num = int(sample_num * ratio)
 
-        tt_sample_num = 5769
+        tt_sample_num = DATA_CONFIG['tt_num']
         train_sample_num = int(tt_sample_num * (1-ratio))
         test_sample_num = int(tt_sample_num * ratio)
 

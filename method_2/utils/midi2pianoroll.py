@@ -3,6 +3,7 @@ import numpy as np
 from utils.midi_io.src.core_midi import midi_parser
 from utils.write_midi import *
 import ipdb
+from copy import deepcopy
 
 
 def get_main_instrument(instruments):
@@ -17,7 +18,7 @@ def get_main_instrument(instruments):
     return main_instrument
 
 
-def get_notes(midi, freq_up, freq_low):
+def get_notes(midi):
     '''
     midi.max_tick represents the length.
     instruments.notes (start, end, pitch, velocity)
@@ -30,35 +31,219 @@ def get_notes(midi, freq_up, freq_low):
     # sort the instruments notes by pitch numbers and note length, then select the best one based on their average rank
     pitch_num = []
     note_len = []
-    for i in range(len(midi.instruments)):
-        tmp_note_group = []
-        notes = midi.instruments[i].notes
-        crop_left = notes[round(len(notes)/2)].start  # crop the blank at the beginning, the beginning often no reference value
-        sum_len = 0
-        pitch_record = []
-        for note in notes[round(len(notes)/2):]:
+    if len(midi.instruments) == 1:
+        return midi.instruments[0].notes
+    else:
+        for ins in midi.instruments:
+            if 'main' in ins.name.lower() or 'lead' in ins.name.lower():
+                return ins.notes
+        return False
+
+    #     tmp_note_group = []
+    #     notes = midi.instruments[i].notes
+    #     crop_left = notes[round(len(notes)/2)].start  # crop the blank at the beginning, the beginning often no reference value
+    #     sum_len = 0
+    #     pitch_record = []
+    #     for note in notes[round(len(notes)/2):]:
+    #         if freq_low <= note.pitch <= freq_up:
+    #             sum_len += (note.end - note.start)
+    #             if note.pitch not in pitch_record:
+    #                 pitch_record.append(note.pitch)
+    #             tmp_note_group.append([note.start - crop_left, note.end - note.start, note.pitch, note.velocity])
+    #
+    #     note_groups.append(tmp_note_group)
+    #     pitch_num.append((i, len(pitch_record)))
+    #     note_len.append((i, sum_len))
+    # pitch_num.sort(key=lambda x: x[1], reverse=True)
+    # note_len.sort(key=lambda x: x[1], reverse=True)
+    # aver_rank = []
+    # for i in range(len(pitch_num)):
+    #     in_index = pitch_num[i][0]
+    #     note_rank = [v for v, _ in note_len].index(in_index)
+    #     av_rank = float((2*(i+1) + (note_rank+1)) / 2)
+    #     aver_rank.append((in_index, av_rank))
+    # aver_rank.sort(key=lambda x: x[1])
+    # for ins, _ in aver_rank:
+    #     if not midi.instruments[ins].is_drum:
+    #         return note_groups[ins]
+
+
+def check_quality(notes_bars, note_starts, bar, freq_up, freq_low, ts_per_bar, data_style):
+    pitch_kinds = {}
+    notes_len = {}
+    for bar_i, notes in notes_bars.items():
+        belong_bar = bar_i
+        if belong_bar not in pitch_kinds.keys():
+            pitch_kinds[belong_bar] = []
+            notes_len[belong_bar] = 0
+        final_notes = []
+        for note in notes:
             if freq_low <= note.pitch <= freq_up:
-                sum_len += (note.end - note.start)
-                if note.pitch not in pitch_record:
-                    pitch_record.append(note.pitch)
-                tmp_note_group.append([note.start - crop_left, note.end - note.start, note.pitch, note.velocity])
+                final_notes.append(note)
+                notes_len[belong_bar] += (note.end - note.start)
+                if note.pitch not in pitch_kinds[belong_bar]:
+                    pitch_kinds[belong_bar].append(note.pitch)
+        notes_bars[bar_i] = final_notes
+    if data_style != 'ch':
+        del_bar = []
+        for be_bar, pitch_list in pitch_kinds.items():
+            if len(pitch_list) < 5:
+                del_bar.append(be_bar)
+        for be_bar, n_len in notes_len.items():
+            if n_len < 0.6 * ts_per_bar * bar:
+                if be_bar not in del_bar:
+                    del_bar.append(be_bar)
+        for be_bar in del_bar:
+            del notes_bars[be_bar]
+            del note_starts[be_bar]
 
-        note_groups.append(tmp_note_group)
-        pitch_num.append((i, len(pitch_record)))
-        note_len.append((i, sum_len))
-    pitch_num.sort(key=lambda x: x[1], reverse=True)
-    note_len.sort(key=lambda x: x[1], reverse=True)
-    aver_rank = []
-    for i in range(len(pitch_num)):
-        in_index = pitch_num[i][0]
-        note_rank = [v for v, _ in note_len].index(in_index)
-        av_rank = float((2*(i+1) + (note_rank+1)) / 2)
-        aver_rank.append((in_index, av_rank))
-    aver_rank.sort(key=lambda x: x[1])
-    for ins, _ in aver_rank:
-        if not midi.instruments[ins].is_drum:
-            return note_groups[ins]
 
+def div_notes_one_bar(note_group, ticks_per_beat, beat_per_bar=4):
+    ticks_bars = ticks_per_beat * beat_per_bar
+    div_bars = {}
+    last_bar = -1
+    for note in note_group:
+        start_bar = note.start // ticks_bars
+        end_bar = note.end // ticks_bars
+        last_bar = end_bar
+        if start_bar == end_bar:  # This note is all in one bar
+            new_note = deepcopy(note)
+            new_note.start = new_note.start - start_bar * ticks_bars
+            new_note.end = new_note.end - start_bar * ticks_bars
+            if start_bar not in div_bars.keys():
+                div_bars[start_bar] = [new_note]
+            else:
+                div_bars[start_bar].append(new_note)
+        else:
+            if end_bar - start_bar > 1:
+
+                new_note0 = deepcopy(note)
+                new_note0.start = new_note0.start - start_bar * ticks_bars
+                new_note0.end = ticks_bars
+                if start_bar not in div_bars.keys():
+                    div_bars[start_bar] = [new_note0]
+                else:
+                    div_bars[start_bar].append(new_note0)
+
+                remain_ticks = (end_bar - start_bar) - (new_note0.end - new_note0.start)
+                repeat_bars = remain_ticks // ticks_bars
+                last_end = remain_ticks % ticks_bars
+
+                for j in range(repeat_bars):
+                    new_note1 = deepcopy(note)
+                    new_note1.start = 0
+                    new_note1.end = ticks_bars
+                    if start_bar + j + 1 not in div_bars.keys():
+                        div_bars[start_bar] = [new_note1]
+                    else:
+                        div_bars[start_bar].append(new_note1)
+                    if j == repeat_bars - 1:
+                        new_note1.start = 0
+                        new_note1.end = last_end
+                        if start_bar + j + 2 not in div_bars.keys():
+                            div_bars[start_bar] = [new_note1]
+                        else:
+                            div_bars[start_bar].append(new_note1)
+
+            elif end_bar - start_bar == 1:
+                new_note0 = deepcopy(note)
+                new_note0.start = new_note0.start - start_bar * ticks_bars
+                new_note0.end = ticks_bars
+
+                new_note1 = deepcopy(note)
+                new_note1.start = 0
+                new_note1.end = new_note1.end - (start_bar + 1) * ticks_bars
+                if start_bar not in div_bars.keys():
+                    div_bars[start_bar] = [new_note0]
+                else:
+                    div_bars[start_bar].append(new_note0)
+                if start_bar + 1 not in div_bars.keys():
+                    div_bars[start_bar + 1] = [new_note1]
+                else:
+                    div_bars[start_bar + 1].append(new_note1)
+    del div_bars[last_bar]
+    return div_bars
+
+
+def div_notes(note_group, ticks_per_beat, bar_num, beat_per_bar=4):
+    ticks_bars = ticks_per_beat * beat_per_bar * bar_num
+    div_bars = {}
+    last_bar = -1
+    for note in note_group:
+        start_bar = note.start // ticks_bars
+        end_bar = note.end // ticks_bars
+        last_bar = end_bar
+        if start_bar == end_bar:  # This note is all in one bar
+            new_note = deepcopy(note)
+            new_note.start = new_note.start - start_bar * ticks_bars
+            new_note.end = new_note.end - start_bar * ticks_bars
+            if start_bar not in div_bars.keys():
+                div_bars[start_bar] = [new_note]
+            else:
+                div_bars[start_bar].append(new_note)
+        else:
+            if end_bar - start_bar > 1:
+
+                new_note0 = deepcopy(note)
+                new_note0.start = new_note0.start - start_bar * ticks_bars
+                new_note0.end = ticks_bars
+                if start_bar not in div_bars.keys():
+                    div_bars[start_bar] = [new_note0]
+                else:
+                    div_bars[start_bar].append(new_note0)
+
+                remain_ticks = (note.end - note.start) - (new_note0.end - new_note0.start)
+                repeat_bars = remain_ticks // ticks_bars
+                last_end = remain_ticks % ticks_bars
+
+                for j in range(repeat_bars):
+                    new_note1 = deepcopy(note)
+                    new_note1.start = 0
+                    new_note1.end = ticks_bars
+                    if start_bar + j + 1 not in div_bars.keys():
+                        div_bars[start_bar + j + 1] = [new_note1]
+                    else:
+                        div_bars[start_bar + j + 1].append(new_note1)
+                    if j == repeat_bars - 1:
+                        new_note1.start = 0
+                        new_note1.end = last_end
+                        if start_bar + j + 2 not in div_bars.keys():
+                            div_bars[start_bar + j + 2] = [new_note1]
+                        else:
+                            div_bars[start_bar + j + 2].append(new_note1)
+
+            elif end_bar - start_bar == 1:
+                new_note0 = deepcopy(note)
+                new_note0.start = new_note0.start - start_bar * ticks_bars
+                new_note0.end = ticks_bars
+
+                new_note1 = deepcopy(note)
+                new_note1.start = 0
+                new_note1.end = new_note1.end - (start_bar + 1) * ticks_bars
+                if start_bar not in div_bars.keys():
+                    div_bars[start_bar] = [new_note0]
+                else:
+                    div_bars[start_bar].append(new_note0)
+                if start_bar + 1 not in div_bars.keys():
+                    div_bars[start_bar + 1] = [new_note1]
+                else:
+                    div_bars[start_bar + 1].append(new_note1)
+    del div_bars[last_bar]
+    return div_bars
+
+
+def resolution_compress(notes_one_bar, ticks_per_beat, data_tpb):
+    compress_ratio = round(ticks_per_beat/data_tpb)
+    note_starts = {}
+    for bar_i, notes_list in notes_one_bar.items():
+        for note in notes_list:
+            note.start = round(note.start/compress_ratio)
+            note.end = round(note.end/compress_ratio)
+            if bar_i not in note_starts.keys():
+                note_starts[bar_i] = [note.start]
+            else:
+                note_starts[bar_i].append(note.start)
+    return note_starts
 
 
 
@@ -93,6 +278,22 @@ def resolution_transfer(note_group, original_tpb, data_tpb, bar, ts_per_bar):
     return where_note_group, dur_group, pitch_group
 
 
+def get_pianoroll(notes_list, starts_list, ts_per_bar, bar, freq_range, freq_low, rest_dim):
+
+    mr = np.zeros((ts_per_bar*bar, 1))
+    for start in starts_list:
+        if start < ts_per_bar*bar:
+            mr[start] = 1
+
+    m = np.zeros((ts_per_bar * bar, freq_range))
+    for note in notes_list:
+        m[note.start:note.end, note.pitch-freq_low] = 1
+
+    for row in m:
+        if np.all(row == 0):
+            row[rest_dim] = 1
+
+    return m, mr
 
 
 def note2pianoroll(note_group,where_note_group,pitch_group,
