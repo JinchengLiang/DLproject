@@ -13,7 +13,7 @@ from mgeval_src import core, utils
 from sklearn.model_selection import LeaveOneOut
 
 set1 = glob.glob(os.path.join('..', 'dataset', 'ChMusicMIDI', '*'))
-set2 = glob.glob(os.path.join('..', 'dataset', 'gen8bar', '*'))
+set2 = glob.glob(os.path.join('..', 'dataset', 'generation', '*'))
 
 print('Evaluation sets (sample and baseline):')
 # print(set1)
