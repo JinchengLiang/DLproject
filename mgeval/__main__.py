@@ -13,14 +13,14 @@ from mgeval_src import core, utils
 from sklearn.model_selection import LeaveOneOut
 
 parser = ArgumentParser()
-parser.add_argument('--set1dir', required=True, type=str,
+parser.add_argument('--set1dir', required=False, type=str, default='../dataset/generation',
                     help='Path (absolute) to the first dataset (folder)')
-parser.add_argument('--set2dir', required=True, type=str,
+parser.add_argument('--set2dir', required=False, type=str, default='../dataset/ChMusicMIDI8bar',
                     help='Path (absolute) to the second dataset (folder)')
-parser.add_argument('--outfile', required=True, type=str,
+parser.add_argument('--outfile', required=False, type=str, default='output',
                     help='File (pickle) where the analysis will be stored')
 
-parser.add_argument('--num_bar', required=False, type=int, default=None,
+parser.add_argument('--num_bar', required=False, type=int, default=8,
                     help='Number of bars to account for during processing')
 
 args = parser.parse_args()
