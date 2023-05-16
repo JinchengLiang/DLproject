@@ -1,3 +1,5 @@
+import os
+
 import mido
 import numpy as np
 import pypianoroll as pypiano
@@ -9,7 +11,7 @@ import torch
 
 from utils.midi_io.src.core_midi import midi_parser
 from utils.write_midi import *
-from configs.data_config import DATA_CONFIG
+from configs.config_data import DATA_CONFIG
 
 
 def batch_shape_to_pianoroll(batch_bar_sample, bar, freq_range,ts_per_bar):
@@ -98,7 +100,6 @@ def save_midi_pypiano(m, midi_path, filename):
     track_m = Track(pianoroll=m1, program=0, is_drum=False, name='Melody')
     multitrack = Multitrack(tracks=[track_m], tempo=80.0, beat_resolution=resolution)
     pypiano.write(multitrack, midi_path+filename+".mid")
-
 
 def pianoroll2midi(m,mr,midi_path,filename):
     bar = 4

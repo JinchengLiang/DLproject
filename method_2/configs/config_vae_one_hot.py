@@ -7,10 +7,11 @@ MAIN_CONFIG = {
     # 'trainer' : 'VAETrainer',
     'trainer' : 'VAETrainer_no_pcd_one_hot',
     'classifier_module' : 'model.classifier',
-    'classifier' : 'classifier_binary',
-    'pretrain_model_c' : '/nas2/annahung/project/anna_jam/presets/classifer_balance.pt',
+    # 'classifier' : 'classifier_binary',
+    'classifier' : 'classifier',
+    'pretrain_model_c' : './classifier/2023_05_15__00_21/presents/loss_min.pt',
 
-    'package_path' : '/nas2/annahung/project/anna_jam_v2/',
+    # 'package_path' : '/nas2/annahung/project/anna_jam_v2/',
 
 }
 
@@ -45,7 +46,7 @@ MODEL_CONFIG = {
 
 TRAIN_CONFIG = {
 'batch_size' : 256, 
-'epochs' : 500,
+'epochs' : 10,
 'vae' : {
     'lr_vae' : 0.001,
     'lr_step1':40,
