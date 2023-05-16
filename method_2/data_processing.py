@@ -1,3 +1,5 @@
+import os
+
 import mido
 import numpy as np
 import torch
@@ -82,7 +84,7 @@ def get_data(bar,
             data_style):
     data_x = []
 
-
+    os.makedirs(DATA_CONFIG['data_path'] + data_style + '/output/', exist_ok=True)
     for filename in pieces_file_path:
         song_name = filename.split('/')[-1].split('\\')[-1].split('.mid')[0]
 
@@ -179,7 +181,7 @@ def get_data_CNN(bar,
 if __name__ == '__main__':
 
     # choose ch data or tt data or debug data
-    data_style = 'ch'
+    data_style = 'tt'
     if data_style == 'ch':
         pieces_file_path = glob.glob(DATA_CONFIG['ch_data_path'] + '*.mid')
         save_filename = DATA_CONFIG['ch_npy']
@@ -189,6 +191,10 @@ if __name__ == '__main__':
     elif data_style == 'debug':
         pieces_file_path = glob.glob(DATA_CONFIG['debug_data_path'] + '*.mid')
         save_filename = 'debug_m.npy'
+
+    if not any(pieces_file_path):
+        print("Error: sample set is empty")
+        exit()
 
     bar = DATA_CONFIG['bar']
     ts_per_bar = DATA_CONFIG['ts_per_bar']
