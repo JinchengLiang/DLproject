@@ -1,4 +1,5 @@
 import os
+import shutil
 from argparse import ArgumentParser
 
 from midiutil import MIDIFile
@@ -24,6 +25,8 @@ mid_set = glob.glob(os.path.join(args.setdir, '*.mid'))
 if not any(mid_set):
   print("Error: sample set is empty")
   exit()
+
+os.makedirs(os.path.join(args.outdir))
 
 num_mid_file = 0
 for mid_file in mid_set:
@@ -78,8 +81,6 @@ for mid_file in mid_set:
 
             outfilename = f"{filename_without_ext}_{bar}.mid"
             outfilepath = os.path.join(args.outdir, outfilename)
-            # create directory if it does not exist
-            os.makedirs(os.path.dirname(outfilepath), exist_ok=True)
             with open(outfilepath, "wb") as output_file:
                 new_midi.writeFile(output_file)
             num_mid_file += 1
