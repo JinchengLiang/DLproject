@@ -41,7 +41,7 @@ python data_div.py --setdir ./dataset/ChMusicMIDI --outdir ./dataset/ChMusicMIDI
 To evaluate two datasets.
 
 ```commandline
-python . --set1dir <path/to/first/sample/directory> --set2dir <path/to/second/sample/directory> --outfir <output_dirname> --num-bar <num_bar>
+python . --set1dir <path/to/first/sample/directory> --set2dir <path/to/second/sample/directory> --outdir <output_dirname> --num-bar <num_bar>
 ```
 For example:
 ```commandline
