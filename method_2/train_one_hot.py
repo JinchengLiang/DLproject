@@ -136,6 +136,8 @@ def train(model,model_c,trainer,dir_name, sample_ratio, is_reconstruction, is_ge
     min_loss = 1000000
     min_BCE  = 1000000
     min_KLD  = 1000000
+    min_loss_train = 1000000
+    min_loss_total = 1000000
 
 
     model = model.to(device)
@@ -170,6 +172,12 @@ def train(model,model_c,trainer,dir_name, sample_ratio, is_reconstruction, is_ge
         if test_KLD_loss < min_KLD:
             min_KLD = test_KLD_loss
             torch.save(model.state_dict(), dir_name+'/presents/KLD_min.pt')
+        if train_loss < min_loss_train:
+            min_loss_train = train_loss
+            torch.save(model.state_dict(), dir_name + '/presents/loss_min_train.pt')
+        if train_loss + test_loss < min_loss_total:
+            min_loss_total = train_loss + test_loss
+            torch.save(model.state_dict(), dir_name + '/presents/loss_min_total.pt')
 
 
 
