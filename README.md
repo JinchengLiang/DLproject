@@ -51,6 +51,6 @@ If you use defualt values, you can just run __main__.py.
 
 ### main_output
 
-The outputs of the best model in our experience is in `main_output` directory.
+The outputs of the best model in our experience are in `main_output` directory.
 
 
