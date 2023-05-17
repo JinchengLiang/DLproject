@@ -1,5 +1,5 @@
 # DLproject
-## Conference
+## Reference
 - ### [jazz_melody_generation](https://github.com/annahung31/jazz_melody_generation)
 ### Updata
 - version from python2 to python3
@@ -19,7 +19,7 @@ python data_div.py --setdir ./dataset/ChMusicMIDI --outdir ./dataset/ChMusicMIDI
 ```
 
 ## mgeval
-### Conference
+### Reference
 - #### [mgeval](https://github.com/RichardYang40148/mgeval/blob/master/demo.ipynb)
 
 
@@ -41,13 +41,16 @@ python data_div.py --setdir ./dataset/ChMusicMIDI --outdir ./dataset/ChMusicMIDI
 To evaluate two datasets.
 
 ```commandline
-python . --set1dir <path/to/first/sample/directory> --set2dir <path/to/second/sample/directory> --outfile <output_filename> --num-bar <num_bar>
+python . --set1dir <path/to/first/sample/directory> --set2dir <path/to/second/sample/directory> --outfir <output_dirname> --num-bar <num_bar>
 ```
 For example:
 ```commandline
-python . --set1dir ../dataset/gen8bar --set2dir ../dataset/ChMusicMIDI8bar --outfile main_output --num_bar 8
+python . --set1dir ../dataset/gen8bar --set2dir ../dataset/ChMusicMIDI8bar --outdir main_output --num_bar 8
 ```
+If you use defualt values, you can just run __main__.py.
 
+### main_output
 
+The outputs of the best model in our experience is in `main_output` directory.
 
 
