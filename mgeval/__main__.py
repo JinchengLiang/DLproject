@@ -1,5 +1,9 @@
 
 import json
+import shutil
+
+import seaborn as sns
+import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 import midi
 import glob
@@ -12,15 +16,16 @@ import pickle
 from mgeval_src import core, utils
 from sklearn.model_selection import LeaveOneOut
 
+
 parser = ArgumentParser()
-parser.add_argument('--set1dir', required=True, type=str,
+parser.add_argument('--set1dir', required=False, type=str, default='../dataset/gen8bar',
                     help='Path (absolute) to the first dataset (folder)')
-parser.add_argument('--set2dir', required=True, type=str,
+parser.add_argument('--set2dir', required=False, type=str, default='../dataset/ChMusicMIDI8bar',
                     help='Path (absolute) to the second dataset (folder)')
-parser.add_argument('--outfile', required=True, type=str,
+parser.add_argument('--outdir', required=False, type=str, default='./main_output',
                     help='File (pickle) where the analysis will be stored')
 
-parser.add_argument('--num_bar', required=False, type=int, default=None,
+parser.add_argument('--num_bar', required=False, type=int, default=8,
                     help='Number of bars to account for during processing')
 
 args = parser.parse_args()
@@ -149,18 +154,47 @@ plot_set2_intra = np.transpose(
 plot_sets_inter = np.transpose(
     sets_inter, (1, 0, 2)).reshape(len(metrics_list), -1)
 
+if os.path.exists(args.outdir):
+    shutil.rmtree(args.outdir)
+    print(f'The folder {args.outdir} has been deleted.')
+else:
+    print(f"The folder '{args.outdir}' does not exist.")
+
+
+os.makedirs(args.outdir, exist_ok=True)
+print(f'The folder {args.outdir} has been created.')
 
 output = {}
 for i, metric in enumerate(metrics_list):
     # print('calculating kl of: {}'.format(metric))
 
-    mean = np.mean(set1_eval[metric], axis=0).tolist()
-    std = np.std(set1_eval[metric], axis=0).tolist()
+    mean1 = np.mean(set1_eval[metric], axis=0).tolist()
+    std1 = np.std(set1_eval[metric], axis=0).tolist()
+
+    mean2 = np.mean(set2_eval[metric], axis=0).tolist()
+    std2 = np.std(set2_eval[metric], axis=0).tolist()
 
     print(metric)
     pprint(plot_set1_intra[i])
     pprint(plot_set2_intra[i])
     pprint(plot_sets_inter[i])
+
+    # Create the KDE plots
+    sns.kdeplot(plot_set1_intra[i], label='intra_generation')
+    sns.kdeplot(plot_sets_inter[i], label='inter')
+    sns.kdeplot(plot_set2_intra[i], label='intra_target')
+    # Add labels and legend
+    plt.legend()
+    #plt.title(metric)
+    plt.xlabel('Euclidean distance')
+    # Save the figure to a file
+    imagename = f"{metric}.png"
+    imagepath = os.path.join(args.outdir, imagename)
+    plt.savefig(imagepath)
+    # Close the plot to free up memory
+    plt.close()
+
+
 
     kl1 = utils.kl_dist(plot_set1_intra[i], plot_sets_inter[i])
     ol1 = utils.overlap_area(plot_set1_intra[i], plot_sets_inter[i])
@@ -171,15 +205,41 @@ for i, metric in enumerate(metrics_list):
     print(f"ol1 = {ol1}")
     print(f"kl2 = {kl2}")
     print(f"ol1 = {ol2}")
-    output[metric] = [mean, std, kl1, ol1, kl2, ol2]
+    output[metric] = [mean1, std1, kl1, ol1, mean2, std2, kl2, ol2]
 
 
 # Save output
-if os.path.exists(args.outfile):
-    os.remove(args.outfile)
-
-output_file = open(args.outfile, 'w')
+filename = 'checkpoint'
+filepath = os.path.join(args.outdir, filename)
+output_file = open(filepath, 'w')
 json.dump(output, output_file)
 output_file.close()
 
-print('Saved output to file: ' + args.outfile)
+print('Saved output to file: ' + args.outdir)
+
+# plot pitch histogram
+f = open(filepath)
+data = json.load(f)
+f.close()
+x = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
+y1 = data['total_pitch_class_histogram'][0]
+y2 = data['total_pitch_class_histogram'][4]
+
+# Define the width of each bar
+bar_width = 0.35
+
+# Calculate the x-coordinates for the bars
+x1 = np.arange(len(x))
+x2 = [val + bar_width for val in x1]
+
+plt.bar(x1, y1, width=bar_width, label='generation')
+plt.bar(x2, y2, width=bar_width, label='target')
+plt.ylabel('(%)')
+plt.xticks(np.arange(len(x1)) + bar_width/2, x)  # Set the x-axis tick labels
+plt.legend()
+# Save the figure to a file
+imagename = "analyse_pitch_class_histogram.png"
+imagepath = os.path.join(args.outdir, imagename)
+plt.savefig(imagepath)
+# Close the plot to free up memory
+plt.close()
