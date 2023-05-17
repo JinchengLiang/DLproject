@@ -53,4 +53,12 @@ If you use defualt values, you can just run __main__.py.
 
 The outputs of the best model in our experience are in `main_output` directory.
 
+## datasets
+[Lakh MIDI](https://paperswithcode.com/dataset/lakh-midi-dataset)
+
+[ChMusic](https://paperswithcode.com/dataset/chmusic)
+
+[ChMusicMIDI, ChMusicMIDI8bar, gen8bar](https://github.com/JinchengLiang/DLproject/tree/Shaomin/dataset)
+
+
 
