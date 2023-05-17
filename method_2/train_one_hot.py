@@ -259,9 +259,6 @@ if __name__ == '__main__':
     MODEL_CONFIG = getattr(config_module, 'MODEL_CONFIG')
     TRAIN_CONFIG = getattr(config_module, 'TRAIN_CONFIG')
 
-    TRAIN_CONFIG['vae']['loss_beta'] = float(args.loss_beta)
-    MODEL_CONFIG['vae']['encoder']['num_of_layer'] = int(args.num_of_layer)
-
 
 
     '''
@@ -289,7 +286,7 @@ if __name__ == '__main__':
 
     #assign a folder to save (timestemp) 
     foldername = 'bata_' + str(TRAIN_CONFIG['vae']['loss_beta']) + '_en_layer_' + str(MODEL_CONFIG['vae']['encoder']['num_of_layer']) +'_ratio_' + str(args.sample_ratio)
-    dir_name = 'paper_outputs_conditional_one_hot/' + foldername + time.strftime("_%m_%d__%H_%M", time.localtime())
+    dir_name = 'paper_outputs_conditional_one_hot/' + foldername
 
     # dir_name = 'outputs/'+ time.strftime("%Y_%m_%d__%H_%M", time.localtime())
     print('output saved to', dir_name)
