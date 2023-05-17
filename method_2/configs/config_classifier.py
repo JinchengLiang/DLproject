@@ -4,7 +4,7 @@ MAIN_CONFIG = {
     'trainer' : 'ClassifierTrainer',
     'classifier_module' : 'model.classifier',
     'classifier' : 'classifier',
-    'package_path' : '/nas2/annahung/project/anna_jam_v2/'
+    # 'package_path' : '/nas2/annahung/project/anna_jam_v2/'
 }
 
 
@@ -21,7 +21,7 @@ MODEL_CONFIG = {
 
 TRAIN_CONFIG = {
 'batch_size' : 256, 
-'epochs' : 200,
+'epochs' : 5,
 'lr' : 1e-5,
 'lr_step1' : 10,
 'lr_step2' : 30,

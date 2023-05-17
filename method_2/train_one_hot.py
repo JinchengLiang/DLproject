@@ -19,7 +19,7 @@ from utils.pianoroll2midi import *
 from utils.midi2pianoroll import midi2pianoroll
 from utils.data_processing import shape_to_bar_sample
 from utils.util import write_json, torch_summarize
-from generating import generating_while_train
+# from generating import generating_while_train
 
 
 def draw_loss(train_loss_list, test_loss_list, dir_name, label):
@@ -72,13 +72,15 @@ def reconstruct(device,DATA_CONFIG,model,dir_name,epoch):
 
 
 def generate(device,model, dir_name,epoch,sample_num=5):
-    jazz_label = True
-    midi_path = dir_name + '/jamming/'
-
-    for idx in range(sample_num):
-        m, mr = generating_while_train(device, model,jazz_label, dir_name)
-        filename ='ep_'+ str(epoch) + '_melody_' + str(idx) 
-        pianoroll2midi(m, mr, midi_path, filename)
+    # jazz_label = True
+    # midi_path = dir_name + '/jamming/'
+    #
+    # for idx in range(sample_num):
+    #     # should be the same as generate function in VAE_one_hot_class
+    #     m, mr = generating_while_train(device, model,jazz_label, dir_name)
+    #     filename ='ep_'+ str(epoch) + '_melody_' + str(idx)
+    #     pianoroll2midi(m, mr, midi_path, filename)
+    pass
 
 
 def interpolate(device, epoch,DATA_CONFIG,model, dir_name, interp_num=5):
@@ -134,6 +136,8 @@ def train(model,model_c,trainer,dir_name, sample_ratio, is_reconstruction, is_ge
     min_loss = 1000000
     min_BCE  = 1000000
     min_KLD  = 1000000
+    min_loss_train = 1000000
+    min_loss_total = 1000000
 
 
     model = model.to(device)
@@ -168,6 +172,12 @@ def train(model,model_c,trainer,dir_name, sample_ratio, is_reconstruction, is_ge
         if test_KLD_loss < min_KLD:
             min_KLD = test_KLD_loss
             torch.save(model.state_dict(), dir_name+'/presents/KLD_min.pt')
+        if train_loss < min_loss_train:
+            min_loss_train = train_loss
+            torch.save(model.state_dict(), dir_name + '/presents/loss_min_train.pt')
+        if train_loss + test_loss < min_loss_total:
+            min_loss_total = train_loss + test_loss
+            torch.save(model.state_dict(), dir_name + '/presents/loss_min_total.pt')
 
 
 
@@ -223,7 +233,7 @@ if __name__ == '__main__':
     # args = argparse.ArgumentParser(description='train')
     parser.add_argument('-c', '--config', default= 'configs.config_vae_one_hot', type=str,
                         help='config file path')
-    parser.add_argument('-data', '--data_config', default= 'configs.data_config', type=str,
+    parser.add_argument('-data', '--data_config', default= 'configs.config_data', type=str,
                         help='data config file path')
     parser.add_argument('-ro', '--sample_ratio', default= '1', type=float,
                         help='Non-jazz/jazz data number ratio')
@@ -233,7 +243,7 @@ if __name__ == '__main__':
                         help='num_of_layer of encoder')
 
 
-    parser.add_argument('-d', '--device', default='5', type=str,
+    parser.add_argument('-d', '--device', default='0', type=str,
                         help='indices of GPUs to enable')
     parser.add_argument('-r', '--reconstruction', default=False, type=bool,
                         help='check the reconstruction while training')
@@ -283,6 +293,7 @@ if __name__ == '__main__':
     classifier_module = importlib.import_module(MAIN_CONFIG['classifier_module'], __package__)
     classifier = getattr(classifier_module, MAIN_CONFIG['classifier'])
     classifier = classifier(DATA_CONFIG,MODEL_CONFIG,device)
+    debug = torch.load(MAIN_CONFIG['pretrain_model_c'])
     classifier.load_state_dict(torch.load(MAIN_CONFIG['pretrain_model_c']))
 
 
@@ -294,7 +305,7 @@ if __name__ == '__main__':
 
     #assign a folder to save (timestemp) 
     foldername = 'bata_' + str(TRAIN_CONFIG['vae']['loss_beta']) + '_en_layer_' + str(MODEL_CONFIG['vae']['encoder']['num_of_layer']) +'_ratio_' + str(args.sample_ratio)
-    dir_name = 'paper_outputs_conditional_one_hot/'+ foldername
+    dir_name = 'paper_outputs_conditional_one_hot/' + foldername + time.strftime("_%m_%d__%H_%M", time.localtime())
 
     # dir_name = 'outputs/'+ time.strftime("%Y_%m_%d__%H_%M", time.localtime())
     print('output saved to', dir_name)

@@ -11,7 +11,7 @@ from argparse import ArgumentParser
 from utils.get_data_loader import ratio_data, jazz_only_data
 # from configs.config_jazz_only_adapt import MAIN_CONFIG, TRAIN_CONFIG, MODEL_CONFIG
 from configs.config_jazz_only_no_pcd import MAIN_CONFIG, TRAIN_CONFIG, MODEL_CONFIG
-from configs.data_config import DATA_CONFIG 
+from configs.config_data import DATA_CONFIG 
 from generating import generating
 from utils.pianoroll2midi import pianoroll2midi
 

@@ -7,9 +7,6 @@ import ipdb
 from utils.pianoroll2midi import *
 
 
-
-
-
 class get_dataloader(object):
     def __init__(self, data, y):
         self.size = data.shape[0]
@@ -293,32 +290,50 @@ class ratio_one_hot_data(object):
     def parse_data(self):
         
         ratio = DATA_CONFIG['testset_ratio']
-        data_path_tt = '/nas2/annahung/project/anna_jam/data/TT_non_intro_m.npy'
-        data_path_cy = '/nas2/annahung/project/anna_jam/data/cy_m.npy'
-        data_path_rb = '/nas2/annahung/project/anna_jam/data/rb_m.npy'
+        # data_path_tt = '/nas2/annahung/project/anna_jam/data/TT_non_intro_m.npy'
+        # data_path_cy = '/nas2/annahung/project/anna_jam/data/cy_m.npy'
+        # data_path_rb = '/nas2/annahung/project/anna_jam/data/rb_m.npy'
+
+        data_path_cy = DATA_CONFIG['data_path'] + DATA_CONFIG['ch_npy']
+        data_path_tt = DATA_CONFIG['data_path'] + DATA_CONFIG['tt_npy']
 
         tt_train_m, tt_test_m, tt_train_y, tt_test_y = self.get_data(data_path_tt,0)
         cy_train_m, cy_test_m, cy_train_y, cy_test_y = self.get_data(data_path_cy,1)
-        rb_train_m, rb_test_m, rb_train_y, rb_test_y = self.get_data(data_path_rb,1)
+        # rb_train_m, rb_test_m, rb_train_y, rb_test_y = self.get_data(data_path_rb,1)
 
 
         
-        sample_num = int(self.sample_ratio * 1446)
-        test_sample_num = int(sample_num * 0.1)
+        # sample_num = int(self.sample_ratio * 1446)
+        # sample_num = int(self.sample_ratio * 5769)  # number of tt mid files
+        # test_sample_num = int(sample_num * ratio)
 
-        tt_train_m = np.asarray(random.sample(list(tt_train_m[10:]), sample_num))
-        tt_test_m = np.asarray(random.sample(list(tt_test_m[10:]), test_sample_num))
+        tt_sample_num = DATA_CONFIG['tt_num']
+        train_sample_num = int(tt_sample_num * (1-ratio))
+        test_sample_num = int(tt_sample_num * ratio)
+
+        tt_train_m = np.asarray(random.sample(list(tt_train_m), train_sample_num))
+        tt_test_m = np.asarray(random.sample(list(tt_test_m), test_sample_num))
+
+        # tt_train_m = np.asarray(random.sample(list(tt_train_m[10:]), sample_num))
+        # tt_test_m = np.asarray(random.sample(list(tt_test_m[10:]), test_sample_num))
 
 
-        train_m = np.concatenate((tt_train_m,cy_train_m[10:],rb_train_m[10:]),axis=0)
-        test_m = np.concatenate((tt_test_m,cy_test_m,rb_test_m),axis=0)
+        # train_m = np.concatenate((tt_train_m,cy_train_m[10:],rb_train_m[10:]),axis=0)
+        # test_m = np.concatenate((tt_test_m,cy_test_m,rb_test_m),axis=0)
+        # train_m = np.concatenate((tt_train_m, cy_train_m[10:]), axis=0)
+        train_m = np.concatenate((tt_train_m, cy_train_m[10:]), axis=0)
+        test_m = np.concatenate((tt_test_m, cy_test_m), axis=0)
 
-        train_y = np.concatenate((tt_train_y[:sample_num], cy_train_y[10:], rb_train_y[10:]),axis=0)
-        test_y = np.concatenate((tt_test_y, cy_test_y, rb_test_y),axis=0)
+        # train_y = np.concatenate((tt_train_y[:sample_num], cy_train_y[10:]),axis=0)
+        train_y = np.concatenate((tt_train_y[:train_sample_num], cy_train_y[10:]), axis=0)
+        test_y = np.concatenate((tt_test_y, cy_test_y),axis=0)
 
 
-        eval_m = np.concatenate((cy_train_m[:10], rb_train_m[:10]), axis=0)
-        eval_y = np.concatenate((cy_train_y[:10], rb_train_y[:10]),axis=0)
+        # eval_m = np.concatenate((cy_train_m[:10], rb_train_m[:10]), axis=0)
+        # eval_y = np.concatenate((cy_train_y[:10], rb_train_y[:10]),axis=0)
+        eval_m = cy_train_m[:10]
+        eval_y = cy_train_y[:10]
+
         print('train_m shape:{}, test_m shape:{}'.format(train_m.shape, test_m.shape))
         print('train_y shape:{}, test_y shape:{}'.format(train_y.shape, test_y.shape))
         return train_m, test_m, train_y, test_y, eval_m, eval_y
@@ -508,7 +523,7 @@ class audio_data(object):
 
 
 
+if __name__ == '__main__':
+    training_data = data()
 
-training_data = data()
-
-train_loader, test_loader = training_data.get_train_test_loader()
+    train_loader, test_loader = training_data.get_train_test_loader()

@@ -191,7 +191,8 @@ class VAE_one_hot(nn.Module):
         self.bar = DATA_CONFIG['bar']
         self.ts_per_bar = DATA_CONFIG['ts_per_bar']
         self.feature_size = DATA_CONFIG['feature_size']
-        self.freq_range = DATA_CONFIG['freq_range']
+        # self.freq_range = DATA_CONFIG['freq_range']
+        self.freq_range = DATA_CONFIG['freq_up'] - DATA_CONFIG['freq_low'] + 2
         self.primary_event = self.feature_size - 1
         self.hidden_m = MODEL_CONFIG['vae']['encoder']['hidden_m']
         self.Bi = 2 if MODEL_CONFIG['vae']['encoder']['direction'] else 1
@@ -204,14 +205,14 @@ class VAE_one_hot(nn.Module):
 
         self.BGRUm      = nn.GRU(input_size=self.feature_size, 
                                 hidden_size=self.hidden_m, num_layers=self.num_layers_en, 
-                                batch_first=True, 
+                                batch_first=True,
                                 bidirectional=MODEL_CONFIG['vae']['encoder']['direction'],
                                 # dropout=self.gru_dropout_en
                                 )
         self.BGRUm2     = nn.GRU(input_size=self.hidden_m*self.Bi_de, 
                                 hidden_size=self.hidden_m, 
                                 num_layers=self.num_layers_de, 
-                                batch_first=True, 
+                                batch_first=True,
                                 bidirectional=MODEL_CONFIG['vae']['decoder']['direction'],
                                 # dropout=self.gru_dropout_de
                                 )
@@ -229,7 +230,7 @@ class VAE_one_hot(nn.Module):
         
         self.hid2mean   = nn.Linear(self.hidden_m*self.Bi*self.bar , self.hidden_m)
         self.hid2var    = nn.Linear(self.hidden_m*self.Bi*self.bar , self.hidden_m)
-        self.lat2hidm   = nn.Linear(self.hidden_m + 2 , self.hidden_m)
+        self.lat2hidm   = nn.Linear(self.hidden_m + 2 , self.hidden_m)  # 2 specify the type (common, chinese)
         
         # self.outm     = nn.Linear(self.hidden_m*self.Bi_de + self.hidden_m  , self.feature_size)
         self.outm     = nn.Linear(self.hidden_m*self.Bi_de  , self.feature_size)
@@ -314,6 +315,8 @@ class VAE_one_hot(nn.Module):
         p_z = Variable(torch.randn(sample_num ,self.hidden_m)).to(self.device)
         y   = Variable(torch.from_numpy(y).type(torch.FloatTensor)).to(self.device)
         label_z = torch.cat((p_z,y), 1)
+        # if device == torch.device('cuda'):
+        #     label_z = label_z.cuda()
         melody= self.decode(label_z)
         m_binarized = self.binarize(melody)
         predict_m = m_binarized.cpu().detach()
@@ -349,6 +352,203 @@ class VAE_one_hot(nn.Module):
         m= self.decode(label_z)
         return m
 
+
+class VAE_attention(nn.Module):
+    """Class that defines the model."""
+
+    def __init__(self, DATA_CONFIG, MODEL_CONFIG, device):
+        super(VAE_attention, self).__init__()
+        self.device = device
+        self.bar = DATA_CONFIG['bar']
+        self.ts_per_bar = DATA_CONFIG['ts_per_bar']
+        self.feature_size = DATA_CONFIG['feature_size']
+        # self.freq_range = DATA_CONFIG['freq_range']
+        self.freq_range = DATA_CONFIG['freq_up'] - DATA_CONFIG['freq_low'] + 2
+        self.primary_event = self.feature_size - 1
+        self.hidden_m = MODEL_CONFIG['vae']['encoder']['hidden_m']
+        self.Bi = 2 if MODEL_CONFIG['vae']['encoder']['direction'] else 1
+        self.Bi_de = 2 if MODEL_CONFIG['vae']['decoder']['direction'] else 1
+        self.num_layers_en = MODEL_CONFIG['vae']['encoder']['num_of_layer']
+        self.gru_dropout_en = MODEL_CONFIG['vae']['encoder']['gru_dropout_en']
+        self.num_layers_de = MODEL_CONFIG['vae']['decoder']['num_of_layer']
+        self.gru_dropout_de = MODEL_CONFIG['vae']['decoder']['gru_dropout_de']
+        self.teacher_forcing_ratio = MODEL_CONFIG['vae']['decoder']['teacher_forcing_ratio']
+
+        # self.BGRUm = nn.GRU(input_size=self.feature_size,
+        #                     hidden_size=self.hidden_m, num_layers=self.num_layers_en,
+        #                     batch_first=True,
+        #                     bidirectional=MODEL_CONFIG['vae']['encoder']['direction'],
+        #                     # dropout=self.gru_dropout_en
+        #                     )
+        encoder_layer = nn.TransformerEncoderLayer(d_model=self.feature_size,
+                                                   nhead=8,
+                                                   dim_feedforward=self.hidden_m,
+                                                   dropout=0.0,
+                                                   batch_first=True
+                                                   )
+        self.attention_encoder = nn.TransformerEncoder(encoder_layer, num_layers=self.num_layers_en)
+
+        decoder_layer = nn.TransformerDecoderLayer(d_model=self.hidden_m,
+                                                   nhead=8,
+                                                   dim_feedforward=self.hidden_m,
+                                                   dropout=0.0,
+                                                   batch_first=True
+                                                   )
+        self.attention_decoder = nn.TransformerDecoder(decoder_layer, num_layers=self.num_layers_de)
+
+        # self.BGRUm2 = nn.GRU(input_size=self.hidden_m * self.Bi_de,
+        #                      hidden_size=self.hidden_m,
+        #                      num_layers=self.num_layers_de,
+        #                      batch_first=True,
+        #                      bidirectional=MODEL_CONFIG['vae']['decoder']['direction'],
+        #                      # dropout=self.gru_dropout_de
+        #                      )
+
+        # self.BGRUm2     = nn.GRU(input_size=self.feature_size,
+        #                         hidden_size=self.hidden_m,
+        #                         num_layers=self.num_layers_de,
+        #                         batch_first=True,
+        #                         bidirectional=MODEL_CONFIG['vae']['decoder']['direction'],
+        #                         dropout=self.gru_dropout_de
+        #                         )
+
+        self.hid2mean = nn.Linear(self.feature_size * self.bar, self.hidden_m)
+        self.hid2var = nn.Linear(self.feature_size * self.bar, self.hidden_m)
+        self.lat2hidm = nn.Linear(self.hidden_m + 2, self.hidden_m)
+        self.memory = nn.Linear(self.feature_size * self.bar, self.hidden_m)
+        self.outm = nn.Linear(self.hidden_m, self.feature_size)
+
+        # self.hid2mean = nn.Linear(self.hidden_m * self.Bi * self.bar, self.hidden_m)
+        # self.hid2var = nn.Linear(self.hidden_m * self.Bi * self.bar, self.hidden_m)
+        # self.lat2hidm = nn.Linear(self.hidden_m + 2, self.hidden_m)  # 2 specify the type (common, chinese)
+
+        # self.outm     = nn.Linear(self.hidden_m*self.Bi_de + self.hidden_m  , self.feature_size)
+        # self.outm = nn.Linear(self.hidden_m * self.Bi_de, self.feature_size)
+
+    def encode(self, m):
+        batch_size = m.shape[0]
+        m = self.attention_encoder(m)  # hn:(num_layers * num_directions, batch, hidden_size):
+        # h1 = hn.contiguous().view(batch_size, self.hidden_m*self.hidden_factor)
+        h1 = m.contiguous().view(batch_size, self.bar * self.feature_size)
+        mu = self.hid2mean(h1)
+        var = self.hid2var(h1)
+        return mu, var, h1
+
+    def reparameterize(self, mu, logvar, y):
+        std = logvar.mul(0.5).exp_()
+        eps = torch.randn(mu.shape).cuda()
+        z = eps * std + mu
+
+        label_z = torch.cat((z, y), 1)
+        return label_z
+
+    def decode(self, label_z, memory):
+        melody = torch.zeros((label_z.shape[0], self.bar, self.feature_size))
+        melody = melody.to(self.device)
+
+        m = self.lat2hidm(label_z)
+        if len(m.shape) > 1:
+            m = m.view(m.shape[0], 1, m.shape[1])
+
+            m = m.repeat(1,self.bar,1)
+        else:
+            m = m.unsqueeze(0)
+            m = m.repeat(self.bar,1)
+            m = m.unsqueeze(0)
+
+        mem = self.memory(memory)
+        # mem = mem.unsqueeze(1)
+
+        for i in range(self.bar):
+            mm = self.attention_decoder(tgt=m, memory=mem)
+            out_m = self.outm(mm[:, 0, :])
+            melody[:, i, :] = torch.sigmoid(out_m)
+        return melody
+
+    def binarize(self, test_m):
+        m_binarized = torch.zeros(test_m.shape)
+        m = test_m[:, :, :-16].reshape(test_m.shape[0], test_m.shape[1] * 16, 49)
+
+        m = torch.argmax(test_m[:, :, :-16].reshape(test_m.shape[0], test_m.shape[1] * 16, 49), 2)
+        m_idx = m.reshape(m.shape[0], self.bar, -1)
+        sample_num = test_m.shape[0]
+        for i in range(sample_num):
+            for j in range(self.bar):
+                for k in range(self.ts_per_bar):
+                    pitch = m_idx[i, j, k]
+                    m_binarized[i, j, 49 * k + pitch] = 1
+
+        pmr = test_m[:, :, -16:].reshape(test_m.shape[0], test_m.shape[1] * self.ts_per_bar)
+        pmr = pmr.cpu().detach().numpy()
+
+        pm2_binarized = np.zeros_like(pmr, dtype=bool)
+        pm2_binarized[pmr > 0.55] = 1
+
+        # _,pm2_binarized = cv2.threshold(pmr,0.55,1,cv2.THRESH_BINARY)
+
+        pmr_idx = pm2_binarized.reshape(pmr.shape[0], self.bar, -1)
+        for i in range(sample_num):
+            for j in range(self.bar):
+                for k in range(self.ts_per_bar):
+                    mr = pmr_idx[i, j, k]
+                    m_binarized[i, j, -16 + k] = int(mr)
+        return m_binarized.to(self.device)
+
+    def forward(self, m, y):
+        mu, logvar, memory = self.encode(m.view(-1, self.bar, self.feature_size))
+
+        ### reparameter
+        z = self.reparameterize(mu, logvar, y)
+
+        # ## random sample
+        # z = torch.randn(m.shape[0], self.hidden_m+self.hidden_c).cuda()
+
+        m_sigmoid = self.decode(z, memory)
+        # m_binarized = self.binarize(m)
+        return m_sigmoid, mu, logvar, z
+
+    def generate(self, sample_num, y, mem):
+        # p_z = Variable(torch.randn(sample_num, self.hidden_m)).to(self.device)
+        p_z = Variable(torch.randn(1, self.hidden_m)).to(self.device)
+        y = Variable(torch.from_numpy(y).type(torch.FloatTensor)).to(self.device)
+        label_z = torch.cat((p_z, y), 1)
+        # if device == torch.device('cuda'):
+        #     label_z = label_z.cuda()
+        # label_z = torch.transpose(label_z, 0, 1)
+        label_z = torch.squeeze(label_z).float()
+        melody = self.decode(label_z, mem)
+        m_binarized = self.binarize(melody)
+        predict_m = m_binarized.cpu().detach()
+
+        gen_m1, gen_mr1 = shape_to_pianoroll(predict_m[0], self.bar, self.freq_range, self.ts_per_bar)
+        for i in range(sample_num - 1):
+            gen_m, gen_mr = shape_to_pianoroll(predict_m[i + 1], self.bar, self.freq_range, self.ts_per_bar)
+            gen_m1 = np.concatenate((gen_m1, gen_m), axis=0)
+            gen_mr1 = np.concatenate((gen_mr1, gen_mr), axis=0)
+
+        return gen_m1, gen_mr1
+
+    def interpolation(self, device, m, y, interp_num=5):
+        ### encode
+        mu, logvar = self.encode(m.view(-1, self.bar, self.feature_size))
+        ### only take mean from encoder
+        z = mu
+
+        a = 0
+        b = 1
+        z = z.cpu().detach().numpy()
+        st_clip = z[a].reshape(1, z.shape[1])  # a: the start clip
+        interp = np.array(slerp(z[a], z[b], interp_num))
+        ed_clip = z[b].reshape(1, z.shape[1])  # b: the end clip
+
+        whole_piece = np.concatenate([st_clip, interp, ed_clip])  # passing clips
+        whole_piece = torch.from_numpy(whole_piece).type(torch.FloatTensor)
+        whole_piece = torch.cat((whole_piece, y), 1)
+        label_z = whole_piece.to(device)
+
+        ### decode
+        m = self.decode(label_z)
+        return m
 
 
 class VAE(nn.Module):

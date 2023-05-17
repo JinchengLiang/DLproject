@@ -97,11 +97,11 @@ if __name__ == '__main__':
     # args = argparse.ArgumentParser(description='train')
     parser.add_argument('-c', '--config', default= 'configs.config_classifier', type=str,
                         help='config file path')
-    parser.add_argument('-data', '--data_config', default= 'configs.data_config', type=str,
+    parser.add_argument('-data', '--data_config', default= 'configs.config_data', type=str,
                         help='data config file path')
     parser.add_argument('-ro', '--sample_ratio', default= '1', type=float,
                         help='Non-jazz/jazz data number ratio')
-    parser.add_argument('-d', '--device', default='5', type=str,
+    parser.add_argument('-d', '--device', default='0', type=str,
                         help='indices of GPUs to enable')
 
     args = parser.parse_args()

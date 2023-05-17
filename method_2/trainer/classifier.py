@@ -14,7 +14,7 @@ import ipdb
 import time
 
 from utils.util import *
-from configs.data_config import DATA_CONFIG
+from configs.config_data import DATA_CONFIG
 from utils.pianoroll2midi import *
 
 

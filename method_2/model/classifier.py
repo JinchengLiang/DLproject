@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 from utils.util import *
-# from configs.data_config import DATA_CONFIG
+# from configs.config_data import DATA_CONFIG
 # from configs.config_vae import MODEL_CONFIG, TRAIN_CONFIG
 
 
