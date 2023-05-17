@@ -9,8 +9,7 @@ MAIN_CONFIG = {
     'classifier_module' : 'model.classifier',
     # 'classifier' : 'classifier_binary',
     'classifier' : 'classifier',
-    'pretrain_model_c' :
-        'C:/Users/13516/Desktop/2023 Spring/ECE-GY 6953 Deep Learning/DLproject/method_2/classifier/2023_05_08__02_40/presents/loss_min.pt',
+    'pretrain_model_c' :'./classifier/2023_05_16__10_44/presents/loss_min.pt',
 
     # 'package_path' : '/nas2/annahung/project/anna_jam_v2/',
 
