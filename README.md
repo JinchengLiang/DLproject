@@ -22,17 +22,6 @@ For the VAE with transformer, the hyperparameter ```model``` should be ```VAE_at
 Generate music by running ```generate.py```. When generating Chinesem music melody, ```y=[0,1]```. Otherwise, ```y=[1,0]```.
 
 
-
-## data_div.py
-To split each MIDI file in a dataset to several MIDI files according to bar count per file.
-```commandline
-python data_div.py --setdir <path/to/dataset/directory> --outdir <path/to/outfiles/directory> --num_bar <num_bar>
-```
-For example
-```commandline
-python data_div.py --setdir ./dataset/ChMusicMIDI --outdir ./dataset/ChMusicMIDI8bar --num_bar 8
-```
-
 ## mgeval
 ### Reference
 - #### [mgeval](https://github.com/RichardYang40148/mgeval/blob/master/demo.ipynb)
@@ -55,6 +44,16 @@ pip install git+https://github.com/vishnubob/python-midi@feature/python3
 - dataset1: [ChMusicMIDI.zip](https://github.com/JinchengLiang/DLproject/tree/Shaomin/dataset)
 
 - dataset2: [gen8bar.zip](https://github.com/JinchengLiang/DLproject/tree/Shaomin/dataset)
+
+### data_div.py
+To split each MIDI file in a dataset to several MIDI files according to bar count per file.
+```commandline
+python data_div.py --setdir <path/to/dataset/directory> --outdir <path/to/outfiles/directory> --num_bar <num_bar>
+```
+For example
+```commandline
+python data_div.py --setdir ./dataset/ChMusicMIDI --outdir ./dataset/ChMusicMIDI8bar --num_bar 8
+```
 
 ### __main__.py
 
